@@ -64,6 +64,38 @@ func Test_BundlePromotion(t *testing.T) {
 	}
 }
 
+func Test_MultiBundlePromotion(t *testing.T) {
+	stockRepo := local.NewStock()
+
+	order := domain.Order{
+		Items: map[domain.Item]int{
+			domain.OrangeSet: 5,
+			domain.PinkSet:   5,
+		},
+	}
+
+	orderService := usecase.NewOrder(order, stockRepo)
+
+	calculator := usecase.NewCalculator(
+		order,
+		orderService,
+		[]usecase.Promotion{
+			usecase.NewBundlePromotion(stockRepo),
+		},
+	)
+
+	result, err := calculator.Calculate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := 960.0
+
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+}
+
 func Test_MemberPromotion(t *testing.T) {
 	stockRepo := local.NewStock()
 
@@ -227,5 +259,24 @@ func Test_ItemNotFound(t *testing.T) {
 
 	if err.Error() != exception.ErrMenuItemNotFound.Error() {
 		t.Errorf("expected %v, got %v", exception.ErrMenuItemNotFound, err)
+	}
+}
+
+func Test_EmptyOrder(t *testing.T) {
+	stockRepo := local.NewStock()
+
+	order := domain.Order{
+		Items: map[domain.Item]int{},
+	}
+
+	orderService := usecase.NewOrder(order, stockRepo)
+
+	result, err := orderService.SubTotal()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if result != 0 {
+		t.Errorf("expected 0, got %v", result)
 	}
 }
