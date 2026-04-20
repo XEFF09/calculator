@@ -9,9 +9,7 @@ import (
 )
 
 func main() {
-	// mock stock repo
 	stockRepo := local.NewStock()
-
 	order := domain.Order{
 		IsMember: true,
 		Items: map[domain.Item]int{
@@ -19,9 +17,7 @@ func main() {
 			domain.RedSet:    1,
 		},
 	}
-
 	orderService := usecase.NewOrder(order, stockRepo)
-
 	calculator := usecase.NewCalculator(
 		order,
 		orderService,
@@ -36,5 +32,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Final Price:", total)
+	fmt.Println("Total Price:", total)
 }
