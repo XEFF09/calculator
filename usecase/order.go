@@ -9,24 +9,22 @@ type OrderService interface {
 	SubTotal() (float64, error)
 }
 
-type order struct {
-	Items     map[domain.Item]int
-	IsMember  bool
+type storeOrder struct {
+	order     domain.Order
 	stockRepo repository.StockRepository
 }
 
-func NewOrder(items map[domain.Item]int, isMember bool, stockRepo repository.StockRepository) OrderService {
-	return &order{
-		Items:     items,
-		IsMember:  isMember,
+func NewOrder(order domain.Order, stockRepo repository.StockRepository) OrderService {
+	return &storeOrder{
+		order:     order,
 		stockRepo: stockRepo,
 	}
 }
 
-func (o *order) SubTotal() (float64, error) {
+func (so *storeOrder) SubTotal() (float64, error) {
 	total := 0.0
-	for item, qty := range o.Items {
-		stockItem, err := o.stockRepo.GetByName(item)
+	for item, qty := range so.order.Items {
+		stockItem, err := so.stockRepo.GetByName(item)
 		if err != nil {
 			return 0, err
 		}
