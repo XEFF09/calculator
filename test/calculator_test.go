@@ -280,3 +280,41 @@ func Test_EmptyOrder(t *testing.T) {
 		t.Errorf("expected 0, got %v", result)
 	}
 }
+
+func Test_RemainingStock(t *testing.T) {
+	stockRepo := local.NewStock()
+
+	order := domain.Order{
+		Items: map[domain.Item]int{
+			domain.GreenSet: 10,
+		},
+	}
+
+	orderService := usecase.NewOrder(order, stockRepo)
+
+	calculator := usecase.NewCalculator(
+		order,
+		orderService,
+		[]usecase.Promotion{
+			usecase.NewBundlePromotion(stockRepo),
+		},
+	)
+
+	_, err := calculator.Calculate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	item, err := stockRepo.GetByName(domain.GreenSet)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := item.Quantity
+
+	expected := 90
+
+	if result != expected {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+}

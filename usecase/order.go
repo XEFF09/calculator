@@ -39,6 +39,11 @@ func (so *storeOrder) SubTotal() (float64, error) {
 			return 0, exception.ErrNotEnoughStock
 		}
 
+		err = so.stockRepo.UpdateStockByName(item, qty)
+		if err != nil {
+			return 0, err
+		}
+
 		total += stockItem.Price * float64(qty)
 	}
 	return total, nil
